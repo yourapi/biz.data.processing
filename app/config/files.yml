@@ -1,0 +1,36 @@
+#Parameters for the flow of the biz-app
+logging:
+  level: DEBUG
+  filename: biz.log
+  format: To be done
+messaging:
+  host: localhost
+  virtual_host: kpn
+  credentials:
+    name: guest
+    password: !!decrypt si1ij8lFtxY=
+  # The vhost is not yet implemented!!
+location:
+  root: p:/data
+threads:
+  - class: biz.trigger.file.new
+    meta:
+      # Meta arguments are supplied with same arguments for every class
+      name: download
+      exchange: collect
+      key: kpn.zm.file.download
+      args:
+    args:
+      # Args are specific for this class and are supplied to __init__ function with unnamed arguments
+      - <location.root>/download
+  - class: biz.trigger.file.new
+    meta:
+      name: source
+    args:
+      - <location.root>/source/kpn/swol_marketing
+#    - class: biz.trigger.imap.new
+#      meta:
+#        name: mail
+#      args:
+#        username: gerard.lutterop@bizservices.nl
+#        password: !!decrypt FZqRc/OJr4QjEPXFBVSuwg==

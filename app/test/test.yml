@@ -1,0 +1,17 @@
+#Parameters for the flow of the biz-app
+#include: test2.yml
+file:
+    filesystem: ntfs
+    collect:
+    - extra
+    - fierce
+mail:
+    imap: impa.google.com
+    password: top-secret)
+    senders:
+    - cruyff
+    - ronaldo
+    actions:
+    - from:
+        - truus
+        - annet

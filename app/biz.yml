@@ -1,0 +1,67 @@
+#Parameters for the flow of the biz-app
+logging:
+  level: DEBUG
+  filename: biz.log
+  format: "%(asctime)s %(levelname)s %(message)s"
+messaging:
+  host: localhost
+  virtual_host: kpn
+  # The vhost is not yet implemented!!
+  url: amqp://<messaging.credentials.name>:<messaging.credentials.password>@localhost:5672/%2F?heartbeat_interval=600
+  credentials:
+    name: guest
+    password: !!decrypt si1ij8lFtxY=
+location:
+  root: p:/data
+  store: <root>/source/kpn/swol_marketing
+threads:
+  - class: biz.trigger.file.new
+    meta:
+      # Meta arguments are supplied with same arguments for every class
+        exchange: collect
+        key_out: kpn.zm.file.download
+    args:
+      # Args are specific for this class and are supplied to __init__ function with unnamed arguments
+      - <location.root>/download
+  - class: biz.trigger.file.new
+    meta:
+      # Meta arguments are supplied with same arguments for every class
+        exchange: collect
+        key_out: kpn.zm.file.storage
+    args:
+      - <location.root>/source/kpn/swol_marketing
+  - class: biz.collect.file.dispatch
+    meta:
+      exchange: collect
+      key_in: kpn.zm.file.download
+      key_out: kpn.zm.file.download.odin
+    kwargs:
+      pattern: odin_dump.*\.zip
+  - class: biz.collect.file.dispatch
+    meta:
+      exchange_in: collect
+      key_in: kpn.zm.file.storage
+      exchange_out: extract
+      key_out: kpn.zm.file.storage.unzip
+    kwargs:
+      pattern: .*\.zip
+      destination: ./extract
+      passwords:        
+      - !!decrypt J2W5Mxma4E68/phWQW2+jA==
+      - !!decrypt 77rtlHpuw/woCKPR76laNg==
+  - class: biz.collect.file.move
+    meta:
+      exchange_in: collect
+      key_in: kpn.zm.file.download.odin
+    kwargs:
+      destination: <location.store>/odin/{date}
+  - class: biz.extract.zip.unzip
+    meta:
+      exchange_in: extract
+      key_in: kpn.zm.file.storage.unzip
+#    - class: biz.trigger.imap.new
+#      meta:
+#        name: mail
+#      args:
+#        username: gerard.lutterop@bizservices.nl
+#        password: !!decrypt FZqRc/OJr4QjEPXFBVSuwg==
