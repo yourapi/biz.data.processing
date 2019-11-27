@@ -14,7 +14,7 @@ class Thread(threading.Thread):
         try:
             __import__(module, fromlist=[klass])
         except ImportError:
-            raise ImportError('No module named %s' % module_name)
+            raise ImportError('No module named {}'.format(module))
         try:
             mod = sys.modules[module]
         except KeyError:
